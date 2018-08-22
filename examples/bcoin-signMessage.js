@@ -1,19 +1,11 @@
 'use strict';
 
-const MTX = require('bcoin/lib/primitives/mtx');
-const Amount = require('bcoin/lib/btc/amount');
-const Keyring = require('bcoin/lib/primitives/keyring');
-const {Script} = require('bcoin/lib/script');
-
-const { SHA256 } = require('bcrypto')
-const { secp256k1 } = require('bcrypto/lib/js/secp256k1')
+const { SHA256, secp256k1 } = require('bcrypto')
 
 const bledger = require('../lib/bledger');
 const {LedgerBcoin, LedgerTXInput} = bledger;
 const {Device} = bledger.HID;
 const Logger = require('blgr');
-
-const fundUtil = require('../test/util/fund');
 
 (async () => {
   const devices = await Device.getDevices();
@@ -38,16 +30,25 @@ const fundUtil = require('../test/util/fund');
   const bcoinApp = new LedgerBcoin({ device });
 
   let message = 'hello world';
+  console.log(`signing: ${message}`);
   message = Buffer.from(message, 'utf8');
   message = SHA256.digest(message);
 
-  const signature = await bcoinApp.signMessage(message, path);
+  const data = await bcoinApp.signMessage(message, path);
+  console.log('response:');
+  console.log(data);
 
-  const hdpubkey = await bcoinApp.getPublicKey(path);
-  const { publicKey } = hdpubkey;
-  const ring = Keyring.fromPublic(publicKey);
+  const r = Buffer.from(data.r, 'hex');
+  const s = Buffer.from(data.s, 'hex');
 
-  const valid = ring.verify(message, signature);
+  // recovery param
+  const param = data.v;
+
+  // r|s format
+  const rs = Buffer.concat([r,s]);
+  const pubkey = secp256k1.recover(message, rs, param);
+
+  const valid = secp256k1.verify(message, rs, pubkey);
   console.log(`valid: ${valid}`);
 
   await device.close();
