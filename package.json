@@ -30,6 +30,7 @@
     "test-ci": "istanbul cover node_modules/.bin/bmocha --report lcovonly -- --reporter spec test/*.js",
     "test-hid": "bmocha --reporter spec test/device/hid-test.js",
     "test-u2f": "karma start .config/karma.conf.js",
+    "test-webusb": "./scripts/bmocha-chrome test/device/webusb-test.js",
     "webpack": "webpack --config .config/webpack.js",
     "webpack-dev": "webpack --config .config/webpack.dev.js",
     "webpack-devdeps": "webpack --config .config/webpack.devdeps.js",
