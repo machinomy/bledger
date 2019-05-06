@@ -4,6 +4,6 @@ node_modules/
 npm-debug.log
 app.js
 coverage/
-
+.idea/
 .config/certs/*
 !.config/certs/.keep
